@@ -1,0 +1,181 @@
+/*
+Programa focado em chamadas de CPU. Tenta adivinhar um número entre 0 e 1.000.000.
+
+@Autores:
+Gustavo B H Azevedo - 1321442
+Maria Carolina Santos - 1312063
+*/
+#include <signal.h>
+#include <sys/shm.h>
+#include <sys/stat.h>
+#include <stdlib.h>
+#include <stdio.h>
+
+// Numero maximo de programas de entrada e tamanho maximo do nome dos programas de entrada
+#define MAX 10
+
+//Tempo de execucao de um programa
+#define QUANTUM 1
+
+// Chave acordada entre Interpretador e escalonador para chave do PID
+key_t PID_KEY = 5555;
+
+// Chave acordada entre Interpretador e escalonador para chave do PID do Interpretador
+key_t PID_KEY_EXT = 4444;
+
+// Chave acordada entre Interpretador e escalonador para o vetor de caracteres
+key_t VET_KEY = 3333;
+
+//Identificador area de memoria do PID deste processo
+int ipcid_PID;
+
+//Identificador area de memoria do PID do processo escalonador
+int ipcid_PID_EXT;
+
+//Identificador area de memoria do vetor de caracteres
+int ipcid_VET;
+
+//Numero de programas ativos
+int PID_VET_SIZE = 0;
+
+//Id deste processo
+int* PID;
+
+//Vetor de identificadores de procesos ativos
+int* PID_VET;
+
+//Id do processo escalonador
+int* PID_EXT = NULL;
+
+//Vetor de caracteres (nomes dos programas)
+char* VET = NULL;
+char Local[10];
+
+FILE* output;
+
+//Inicializa o vetor de processos.
+void startPIDVET(){
+	PID_VET = (int*) malloc(sizeof(int)*MAX);
+	int i;
+	for (i=0; i<MAX; i++){
+		//Codigo para posicao vazia
+		PID_VET[i]=-1;
+	}
+}
+
+//Rotina de limpeza para encerramento
+void exitRoutine(){
+	shmdt(PID);
+	shmctl(ipcid_PID, IPC_RMID, 0);
+	shmdt(PID_EXT);
+	shmctl(ipcid_PID_EXT, IPC_RMID, 0);
+	shmdt(VET);
+	shmctl(ipcid_VET, IPC_RMID, 0);
+	fclose(output);
+}
+
+//Aguarda sinal de dados escritos iniciar escalonamento
+void usr1Handler(int sinal){
+	if(VET==NULL){
+		ipcid_VET = shmget(VET_KEY, sizeof(char*)*MAX, S_IRUSR|S_IWUSR);
+		VET = (char*) shmat(ipcid_VET, 0, 0); 
+	}
+
+	int i;
+	for(i=0;i<MAX; i++){
+		Local[i]=VET[i];
+	}
+
+
+	int f = fork();
+	if(f!=0){
+		kill(f, SIGSTOP);
+		printf("ESC: Recebido (%s), pidFilho: %d, index: %d\n", Local,f, PID_VET_SIZE );
+		PID_VET[PID_VET_SIZE++]=f;
+		if(PID_EXT==NULL){
+			ipcid_PID_EXT = shmget(PID_KEY_EXT, sizeof(int), S_IRUSR|S_IWUSR);
+			PID_EXT = (int*) shmat(ipcid_PID_EXT, 0, 0);
+		}
+		
+		kill(*PID_EXT, SIGUSR2);
+				
+	}else{
+		char* s[] = {Local, NULL};
+		execve(Local, s ,0);
+	}
+
+
+	
+}
+
+void sigHandler(int sinal){
+	printf("TOMEI EXIT %d\n", sinal);
+	exitRoutine();
+	exit(42);
+}
+
+// Cadastramento do tratador de sinal para liberar recursos
+void registerHandler(){
+	void (*p) (int);
+	p = signal (SIGUSR1, usr1Handler);
+	if(p == SIG_ERR){
+		printf("Erro de registro SIGUSR1\n");
+		exit(-1);
+	}
+	p = signal (SIGSEGV, sigHandler);
+	if(p == SIG_ERR){
+		printf("Erro de registro SIGSEGV\n");
+		exit(-1);
+	}
+	p = signal (SIGQUIT, sigHandler);
+	if(p == SIG_ERR){
+		printf("Erro de registro SIGQUIT\n");
+		exit(-1);
+	}
+	p = signal (SIGTERM, sigHandler);
+	if(p == SIG_ERR){
+		printf("Erro de registro SIGTERM\n");
+		exit(-1);
+	}
+}
+
+// Funcao principal de trabalho. 42 indica conclusao com sucesso
+int main (void){
+	
+	//Cadastramento do PID em memoria
+	ipcid_PID = shmget(PID_KEY, sizeof(int), IPC_CREAT|IPC_EXCL|S_IRUSR|S_IWUSR);
+	PID = (int*) shmat(ipcid_PID, 0, 0); 
+	*PID = getpid();
+	
+	// Cadastramento do tratador de sinal para liberar recursos
+	registerHandler();
+	
+	//Inicializacao do vetor de processos
+	startPIDVET();
+
+	if ((output = fopen ("./saida.txt", "a+")) == NULL){
+		printf("Erro ao abrir o arquivo de output!\n");
+		exit(-1);
+	}
+	
+	while(1){
+		int i;
+		for(i=0; i<PID_VET_SIZE; i++){
+			int pid = PID_VET[i];
+			if(pid!=-1){
+				int status;
+				pid_t result = waitpid(pid, &status, WNOHANG);
+				if (result == 0){
+				printf("ESC: Inicio (%d) index: %d ret:%d \n", pid, i, result);
+					kill(pid, SIGCONT);
+					sleep(QUANTUM);
+					kill(pid, SIGSTOP);	
+				fprintf(output,"ESC: FIM (%d) index: %d ret:%d \n", pid, i, result);
+				}else{
+					PID_VET[i]=-1;
+				}
+			}
+		}
+	}
+	return 42;
+}

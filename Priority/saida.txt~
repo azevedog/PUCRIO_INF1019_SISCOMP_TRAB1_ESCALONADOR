@@ -1,0 +1,51 @@
+ESC: Recebido (ioBound1), pid do novo processo: 3409
+ESC: Pid (-1) changed - ENTER!
+ESC: Pid (3409) changed - EXIT!
+ESC: Pid (3409) changed - EXIT!
+ESC: Recebido (cpuBound1), pid do novo processo: 3410
+ESC: Pid (3409) changed - ENTER!
+ESC: Pid (3410) changed - EXIT!
+ESC: Recebido (cpuBound2), pid do novo processo: 3411
+ESC: Pid (3410) changed - EXIT!
+ESC: Recebido (ioBound2), pid do novo processo: 3412
+ESC: Pid (3410) concluido!
+ESC: Pid (3412) Executando!
+ioBound2.c started
+ioBound1>7
+cpuBound1>2
+cpuBound2>6
+ioBound2>3
+ioBound2.c finished
+ESC: Pid (3412) concluido!
+ESC: Pid (3411) Executando!
+ESC: Pid (3411) concluido!
+ESC: Pid (3409) Executando!
+ioBound1.c started
+IO1 - Working - 1seg
+IO1 - Working - 2seg
+IO1 - Working - 3seg
+IO1 - Working - 4seg
+IO1 - Working - 5seg
+IO1 - Working - 6seg
+IO1 - Working - 7seg
+IO1 - Working - 8seg
+IO1 - Working - 9seg
+IO1 - Working - 10seg
+IO1 - Working - 11seg
+IO1 - Working - 12seg
+IO1 - Working - 13seg
+IO1 - Working - 14seg
+IO1 - Working - 15seg
+IO1 - Working - 16seg
+IO1 - Working - 17seg
+IO1 - Working - 18seg
+IO1 - Working - 19seg
+IO1 - Working - 20seg
+IO1 - Working - 21seg
+IO1 - Working - 22seg
+IO1 - Working - 23seg
+IO1 - Working - 24seg
+IO1 - Working - 25seg
+ioBound1.c finished
+ESC: Pid (3409) concluido!
+

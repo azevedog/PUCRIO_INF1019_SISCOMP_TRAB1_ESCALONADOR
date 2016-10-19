@@ -1,0 +1,143 @@
+/*
+Interpretador de nome de programas
+
+@Autores:
+Gustavo B H Azevedo - 1321442
+Maria Carolina Santos - 1312063
+*/
+
+#include <signal.h>
+#include <sys/shm.h>
+#include <sys/stat.h>
+#include<stdlib.h>
+#include<stdio.h>
+#include "contract.h"
+
+struct job{
+	char* name;
+	short* tickets;
+};
+typedef struct job Job;
+
+//Identificador area de memoria do PID deste processo
+int ipcid_PID;
+
+//Identificador area de memoria do PID do processo escalonador
+int ipcid_PID_EXT;
+
+//Identificador area de memoria do vetor de caracteres
+int ipcid_VET;
+
+//Id deste processo
+int* PID;
+
+//Id do processo escalonador
+int* PID_EXT = NULL;
+
+//Vetor de caracteres (nomes dos programas)
+Job* VET;
+
+//Arquivo de entrada com os nomes dos programas a serem executados
+FILE* INPUT;
+
+//Indica que a memoria compartilhada esta ocupada e o programa deve aguardar
+int HOLD = 0;
+
+//Rotina de limpeza para encerramento
+void exitRoutine(){
+	shmdt(VET);
+	shmctl(ipcid_VET, IPC_RMID, 0);
+	shmdt(PID);
+	shmctl(ipcid_PID, IPC_RMID, 0);
+	shmdt(PID_EXT);
+	shmctl(ipcid_PID_EXT, IPC_RMID, 0);
+	fclose(INPUT);
+	exit(42);
+}
+
+//Aguarda sinal de dados lidos para liberar recursos. 42 indica conclusao com sucesso
+void sigHandler(int sinal){
+	exitRoutine();	
+}
+
+//Aguarda sinal de dados lidos para liberar recursos. 42 indica conclusao com sucesso
+void usr2Handler(int sinal){
+	HOLD=0;
+}
+
+// Cadastramento do tratador de sinal para liberar recursos
+void registerHandler(){
+	void (*p) (int);
+	p = signal (SIGUSR2, usr2Handler);
+	if(p == SIG_ERR){
+		printf("Erro de registro SIGUSR2\n");
+		exit(-1);
+	}
+	p = signal (SIGSEGV, sigHandler);
+	if(p == SIG_ERR){
+		printf("Erro de registro SIGSEGV\n");
+		exit(-1);
+	}
+	p = signal (SIGQUIT, sigHandler);
+	if(p == SIG_ERR){
+		printf("Erro de registro SIGQUIT\n");
+		exit(-1);
+	}
+	p = signal (SIGTERM, sigHandler);
+	if(p == SIG_ERR){
+		printf("Erro de registro SIGTERM\n");
+		exit(-1);
+	}
+}
+
+// Funcao principal de trabalho. 42 indica conclusao com sucesso
+int main (void){
+
+	//Cadastramento do PID em memoria
+	ipcid_PID = shmget(INT_KEY, sizeof(int), IPC_CREAT|IPC_EXCL|S_IRUSR|S_IWUSR);
+	PID = (int*) shmat(ipcid_PID, 0, 0); 
+	*PID = getpid();
+	
+	// Cadastramento do tratador de sinal para liberar recursos
+	registerHandler();
+
+	//Abertura do arquivo de entrada para leitura
+	if ((INPUT = fopen ("./entrada.txt", "r")) == NULL){
+		printf("Erro ao abrir o arquivo de INPUT!\n");
+		exit(-1);
+	}
+
+	ipcid_PID_EXT = shmget(ESC_KEY, sizeof(int), S_IRUSR|S_IWUSR);
+	PID_EXT = (int*) shmat(ipcid_PID_EXT, 0, 0);
+	
+
+	//Criacao da infra compartilhada
+	ipcid_VET = shmget(VET_KEY, sizeof(char*)*MAX, IPC_CREAT|IPC_EXCL|S_IRUSR|S_IWUSR);
+	VET = (char*) shmat(ipcid_VET, 0, 0); 
+	
+	//Interpretacao do entrada.txt para a area compartilhada
+	char current;
+	int i=0;
+	while(1){
+		if(!HOLD){
+			current = fgetc(INPUT);
+			if(current == EOF){
+				exitRoutine();
+			}else{
+				VET[i] = current;
+				if(current=='\n'){
+					VET[i] = '\0';
+					kill(*PID_EXT, SIGUSR1);
+					HOLD=1;
+					i=0;
+				}else{
+					i++;
+				}
+			}
+		}
+	}
+	
+	return 42;
+}
+
+

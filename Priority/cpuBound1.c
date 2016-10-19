@@ -1,0 +1,26 @@
+/*
+Programa focado em chamadas de CPU. Tenta quebrar uma senha por força bruta
+
+
+@Autores:
+Gustavo B H Azevedo - 1321442
+Maria Carolina Santos - 1312063
+*/
+
+//Senha.
+#define PASS "abcdefghijlmnopqrstuvxz"
+
+//Tamanho da senha
+#define SIZE 23
+
+// Funcao principal de trabalho. 42 indica conclusao com sucesso.
+int main (void){
+	int i;
+	char try;
+
+	for(i=0; i<SIZE; i++){
+		try = 'a';
+		while(PASS[i]!=try) try++;
+	}
+	return 42;
+}

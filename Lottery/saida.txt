@@ -1,0 +1,106 @@
+ESC: Recebido (ioBound1), pid do novo processo: 3186
+ESC -  ticket: 1 to pid: 3186
+ESC -  ticket: 2 to pid: 3186
+ESC -  ticket: 3 to pid: 3186
+ESC -  ticket: 20 to pid: 3186
+ESC: Ticket sorteado: 20 pid: 3186
+ESC: Fazendo (3186)
+ESC: Fazendo (3186)
+ESC: Recebido (cpuBound1), pid do novo processo: 3187
+ESC -  ticket: 4 to pid: 3187
+ESC -  ticket: 5 to pid: 3187
+ESC -  ticket: 19 to pid: 3187
+ESC: Recebido (cpuBound2), pid do novo processo: 3188
+ESC -  ticket: 7 to pid: 3188
+ESC -  ticket: 11 to pid: 3188
+ESC: Ticket sorteado: 2 pid: 3186
+ESC: Ticket sorteado: 2 pid: 3186
+ESC: Recebido (ioBound2), pid do novo processo: 3189
+ESC -  ticket: 15 to pid: 3189
+ESC: Fazendo (3186)
+ioBound1.c started
+IO1 - Working - 1seg
+ESC: Ticket sorteado: 7 pid: 3188
+ESC: Fazendo (3188)
+ESC: Ticket sorteado: 5 pid: 3187
+ESC: Fazendo (3187)
+ESC: Ticket sorteado: 5 pid: 3187
+ESC: Ticket sorteado: 11 pid: 3188
+ESC: Fazendo (3188)
+ESC: Ticket sorteado: 3 pid: 3186
+ESC: Fazendo (3186)
+IO1 - Working - 2seg
+IO1 - Working - 3seg
+IO1 - Working - 4seg
+IO1 - Working - 5seg
+ESC: Ticket sorteado: 15 pid: 3189
+ESC: Fazendo (3189)
+ioBound2.c started
+ioBound1{1,2,3,20}
+cpuBound1{4,5,19}
+cpuBound2{7,11}
+ioBound2{15}
+ioBound2.c finished
+ESC: Ticket sorteado: 3 pid: 3186
+ESC: Fazendo (3186)
+IO1 - Working - 6seg
+IO1 - Working - 7seg
+ESC: Ticket sorteado: 15 pid: 3189
+ESC: Ticket sorteado: 2 pid: 3186
+ESC: Fazendo (3186)
+IO1 - Working - 8seg
+ESC: Ticket sorteado: 3 pid: 3186
+ESC: Fazendo (3186)
+IO1 - Working - 9seg
+ESC: Ticket sorteado: 20 pid: 3186
+ESC: Fazendo (3186)
+IO1 - Working - 10seg
+ESC: Ticket sorteado: 11 pid: 3188
+ESC: Fazendo (3188)
+ESC: Ticket sorteado: 11 pid: 3188
+ESC: Fazendo (3188)
+ESC: Ticket sorteado: 1 pid: 3186
+ESC: Fazendo (3186)
+IO1 - Working - 11seg
+IO1 - Working - 12seg
+IO1 - Working - 13seg
+ESC: Ticket sorteado: 1 pid: 3186
+ESC: Fazendo (3186)
+IO1 - Working - 14seg
+ESC: Ticket sorteado: 7 pid: 3188
+ESC: Fazendo (3188)
+ESC: Ticket sorteado: 20 pid: 3186
+ESC: Fazendo (3186)
+IO1 - Working - 15seg
+IO1 - Working - 16seg
+ESC: Ticket sorteado: 7 pid: 3188
+ESC: Fazendo (3188)
+ESC: Ticket sorteado: 1 pid: 3186
+ESC: Fazendo (3186)
+IO1 - Working - 17seg
+IO1 - Working - 18seg
+ESC: Ticket sorteado: 11 pid: 3188
+ESC: Fazendo (3188)
+ESC: Ticket sorteado: 2 pid: 3186
+ESC: Fazendo (3186)
+IO1 - Working - 19seg
+IO1 - Working - 20seg
+ESC: Ticket sorteado: 7 pid: 3188
+ESC: Fazendo (3188)
+ESC: Ticket sorteado: 2 pid: 3186
+ESC: Fazendo (3186)
+IO1 - Working - 21seg
+IO1 - Working - 22seg
+ESC: Ticket sorteado: 7 pid: 3188
+ESC: Fazendo (3188)
+ESC: Ticket sorteado: 11 pid: 3188
+ESC: Ticket sorteado: 20 pid: 3186
+ESC: Fazendo (3186)
+IO1 - Working - 23seg
+IO1 - Working - 24seg
+ESC: Ticket sorteado: 3 pid: 3186
+ESC: Fazendo (3186)
+IO1 - Working - 25seg
+ioBound1.c finished
+ESC: Ticket sorteado: 3 pid: 3186
+

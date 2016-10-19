@@ -1,0 +1,98 @@
+ESC: Recebido (ioBound1), pid para o novo processo: 2840
+ESC: CONT: (2840)
+ESC: CONT: (2840)
+ESC: Recebido (cpuBound1), pid para o novo processo: 2841
+ESC: Recebido (cpuBound2), pid para o novo processo: 2842
+ESC: STOP: (2840)
+ESC: STOP: (2840)
+ESC: Recebido (ioBound2), pid para o novo processo: 2843
+ESC: CONT: (2841)
+ESC: STOP: (2841)
+ESC: CONT: (2842)
+ESC: STOP: (2842)
+ESC: CONT: (2843)
+ioBound2.c started
+ESC: STOP: (2843)
+ESC: CONT: (2840)
+ioBound1.c started
+IO1 - Working - 1seg
+ESC: STOP: (2840)
+ESC: CONT: (2842)
+ESC: STOP: (2842)
+ESC: CONT: (2843)
+ioBound1
+cpuBound1
+cpuBound2
+ioBound2
+ioBound2.c finished
+ESC: STOP: (2843)
+ESC: CONT: (2840)
+IO1 - Working - 2seg
+IO1 - Working - 3seg
+IO1 - Working - 4seg
+ESC: STOP: (2840)
+ESC: CONT: (2842)
+ESC: STOP: (2842)
+ESC: CONT: (2840)
+IO1 - Working - 5seg
+IO1 - Working - 6seg
+ESC: STOP: (2840)
+ESC: CONT: (2842)
+ESC: STOP: (2842)
+ESC: CONT: (2840)
+IO1 - Working - 7seg
+IO1 - Working - 8seg
+ESC: STOP: (2840)
+ESC: CONT: (2842)
+ESC: STOP: (2842)
+ESC: CONT: (2840)
+IO1 - Working - 9seg
+IO1 - Working - 10seg
+ESC: STOP: (2840)
+ESC: CONT: (2842)
+ESC: STOP: (2842)
+ESC: CONT: (2840)
+IO1 - Working - 11seg
+IO1 - Working - 12seg
+ESC: STOP: (2840)
+ESC: CONT: (2842)
+ESC: STOP: (2842)
+ESC: CONT: (2840)
+IO1 - Working - 13seg
+IO1 - Working - 14seg
+ESC: STOP: (2840)
+ESC: CONT: (2842)
+ESC: STOP: (2842)
+ESC: CONT: (2840)
+IO1 - Working - 15seg
+IO1 - Working - 16seg
+ESC: STOP: (2840)
+ESC: CONT: (2842)
+ESC: STOP: (2842)
+ESC: CONT: (2840)
+IO1 - Working - 17seg
+IO1 - Working - 18seg
+ESC: STOP: (2840)
+ESC: CONT: (2840)
+IO1 - Working - 19seg
+ESC: STOP: (2840)
+ESC: CONT: (2840)
+IO1 - Working - 20seg
+ESC: STOP: (2840)
+ESC: CONT: (2840)
+IO1 - Working - 21seg
+ESC: STOP: (2840)
+ESC: CONT: (2840)
+IO1 - Working - 22seg
+ESC: STOP: (2840)
+ESC: CONT: (2840)
+IO1 - Working - 23seg
+ESC: STOP: (2840)
+ESC: CONT: (2840)
+IO1 - Working - 24seg
+ESC: STOP: (2840)
+ESC: CONT: (2840)
+IO1 - Working - 25seg
+ioBound1.c finished
+ESC: STOP: (2840)
+

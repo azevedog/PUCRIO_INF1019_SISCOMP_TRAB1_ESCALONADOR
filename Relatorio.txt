@@ -1,0 +1,263 @@
+INF1019 - Primeiro trabalho de Sistemas de Computação
+
+Trabalho de:
+	Gustavo B H Azevedo - 1321442
+	Maria Carolina Santos - 1312063
+
+
+== Comentários Gerais ==
+
+	Escolhemos fazer os 3 escolonadores separadamente. Assim, nosso trabalho pode ser encarado como 3 trabalhos independentes. A pasta de cada um dos escalonadores é composta por: o escalonador; o interpretador; 4 programas de teste (2 ioBound e 2 cpuBound); um contrato de comunicação entre o intepretador e o escalonador; o arquivo de entrada e o arquivo de saída. Escolhemos fazer o interpretador e o escalonador como 2 programas e processos completamente separados, sendo necessário inicia-los manualmente e terminais distintos. Dessa forma, optamos por fazer a comunicação entre eles via sinal e a troca de dados via memória compartilhada. Cada interpretador tem sua peculiaridade de comunicação e estas serão detalhadas abaixo. O contrato de comunicação apenas amarra via “interface” os identificadores das áreas de memória compartilhada.
+	Neste trabalho, buscamos chegar o mais próximo possível da realidade de um escalonador. Assim, não utilizamos a política de disparar um processo a cada 3 segundos proposta pelo professor, nem utilizamos um fork no interpretador para iniciar o escalonador (ambas as opções foram devidamente aprovadas pelo professor). Abaixo descrevemos um pequeno fluxo que ilustra a arquitetura adotada para solucionar o problema, que guiou o desenvolvimento dos 3 escalonadores:
+
+- Escalonador é iniciado no terminal 1;
+- - Escalonador publica seu pid em uma área na memória pré acordada via contrato
+- - Inicializa suas estruturas e tratadores e sinal
+- - Inicia processo de escalonamento, mas ainda com lista de processos vazia
+
+- Interpretador é iniciado no terminal 2;
+- - Interpretador publica seu pid em uma área na memória pré acordada via contrato
+- - Inicializa suas estruturas e tratadores e sinal
+- - Busca pid do escalonador
+- - Inicia leitura do arquivo entrada.txt
+- - Grava nome de programa na memória compartilhada (J1*)
+- - Envia sinal para Escalonador
+- - Se bloquei
+
+- Escalonador recebe sinal
+- - Copia dados da memória compartilhada
+— - Inicia novo processo para o programa recebido
+- - Inclui na estrutura de escalonamento
+- - Avisa (se necessário) a si mesmo da novidade
+- - Envia sinal de recebido para interpretador
+- - Segue escalonando
+
+- Interpretator retoma leitura
+- - Repete o processo anterior no ponto (J1*)
+
+
+== Observações ==
+
+	- O tempo de intervalo de inicio dos processos no escalonador, ao invés de ser fixo em 3 segundos, varia com o tempo de leitura do interpretador. Ou seja, a cada nome de programa lido no entrada.txt, o interpretador interrompe o escalonador que por sua vez pode decidir o que faz com a nova entrada (ex.: No caso de prioridade ele pode decidir se troca ou não o programa em execução no momento).
+	- A publicação dos pids em memória torna o escalonador e o interpretador totalmente independentes um do outro, possibilitando a substituição de um ou do outro, desde que o contrato de comunicação seja respeitado.
+	- A cópia local dos dados de memória no escalonador foi necessária, para permitir que o interpretador pudesse a sobre escreve em paralelo com o uso da informação (nome do programa) pelo processo filho, que usa essa info para fazer o exeve.
+
+
+== Arquivos de Teste ==
+
+	- Para todos os escalonadores usamos os mesmos programas de teste, descritos abaixo. No entanto, para cada um dos escalonadores, variamos as ordens de execução buscando verificar características específicas de cada caso.
+	- Para termos um ambiente de testes seguros, os programas de testes foram replicados em cada pasta de escalonador evitando interferências.
+
+	ioBound1.c - Programa, focado em chamadas de I/O, que necessita de 25 segundos para fazer sua tarefa. Imprime um texto a cada segundo.
+	ioBound2.c - Programa, focado em chamadas de I/O, que copia o arquivo de entrada para o arquivo de saída.
+	cpuBound1.c - Programa focado em chamadas de CPU. Tenta quebrar uma senha por força bruta. 
+	cpuBound2.c - Programa focado em chamadas de CPU. Tenta adivinhar os 5 primeiros dígitos de Pi, chutando randomicamente números entre 0 e 1.000.000.
+
+
+== RoundRobin ==
+
+	Para esse escalonador, a área de memória compartilhada tem apenas um string de no máximo 25 caracteres. O escalonador é capaz de tratar até 25 programas simultaneamente. O quantum de escalonamento é 1 segundo. Nessa pasta você encontrará os arquivos de teste e mais:
+
+	contractRobin.h - Contrato de comunicação.
+	InterRound.c - Interpretador de nome de programas.
+	RoundRobin.c - Escalonador com política de Round Robin.
+	entrada.txt - Entrada de programas a serem testados
+	saida.txt - Arquivo gerado quando se executa um dos escalonadores citados acima, com opção de saída do STDOut no arquivo.
+
+	== Formato entrada == 
+		
+		ioBound1
+		cpuBound1
+		cpuBound2
+		ioBound2
+ 	
+	== Compilação == 
+	
+		gcc ioBound1.c -o ioBound1
+		gcc ioBound2.c -o ioBound2
+		gcc cpuBound1.c -o cpuBound1
+		gcc cpuBound2.c -o cpuBound2
+		gcc RoundRobin.c -o RoundRobin
+		gcc InterRound.c -o InterRound
+
+	== Execução ==
+
+		No terminal 1 digite ./RoundRobin para iniciar o escalonador.
+		No terminal 2 digite ./InterRound para iniciar o interpretador.
+
+	== Saída ==
+		
+		Disponível no arquivo saida.txt
+
+	== Resultados e Comentários ==
+
+		O teste mostra o funcionamento do Round Robin. Cada programa é executado em um time slice de 1 segundo.
+
+
+
+== Lottery ==
+
+	Para esse escalonador, a área de memória compartilhada tem um string de no máximo 25 caracteres (nome do programa) e no máximo 4 inteiros (tickets). O escalonador é capaz de tratar até 25 programas simultaneamente. O quantum de escalonamento é 1 segundo, no entanto o vetor de programas não percorrido sequencialmente. Neste caso há um sorteio e uma busca do ticket sorteado na estrutura de tickets de cada PID. Caso nenhum pid possua o ticket sorteado, um novo sorteio é realizado até que um ticket seja encontrado. Nessa pasta você encontrará os arquivos de teste e mais:
+
+	contractLottery.h - Contrato de comunicação.
+	InterLottery.c - Interpretador de nome de programas.
+	Lottery.c - Escalonador com política de Loteria.
+	entrada.txt - Entrada de programas a serem testados
+	saida.txt - Arquivo gerado quando se executa um dos escalonadores citados acima, com opção de saída do STDOut no arquivo.
+
+
+	== Formato entrada == 
+		
+		ioBound1{1,2,3,20}
+		cpuBound1{4,5,19}
+		cpuBound2{7,11}
+		ioBound2{15}
+
+ 	
+	== Compilação == 
+	
+		gcc ioBound1.c -o ioBound1
+		gcc ioBound2.c -o ioBound2
+		gcc cpuBound1.c -o cpuBound1
+		gcc cpuBound2.c -o cpuBound2
+		gcc Lottery.c -o Lottery
+		gcc InterLottery.c -o InterLottery
+
+	== Execução ==
+
+		No terminal 1 digite ./Lottery para iniciar o escalonador.
+		No terminal 2 digite ./interLottery para iniciar o interpretador.
+
+	== Saída ==
+		
+		Disponível no arquivo saida.txt
+
+	== Resultados e Comentários ==
+
+		O teste mostra o funcionamento da loteria. Nesse caso a ordem foi mantida mas o ioBound1 que é o mais lento, tem maior número de tickets, com isso esperávamos que o print de saída misturasse bastante os dois programas de IO. O resultado foi obtido.
+
+
+
+== Priority ==
+
+	Para esse escalonador, a área de memória compartilhada tem um string de no máximo 13 caracteres (nome do programa) e 1 inteiro (prioridade de 1 até 7). O escalonador é capaz de tratar até 13 programas simultaneamente. Nesse caso não há quantum, um processo é executado até que acabe ou até que o escalonador receba um novo processo com maior prioridade. Ao acabar, busca programa com maior prioridade, dentre os programas ainda não terminados.
+
+	contractPriority.h - Contrato de comunicação.
+	InterPriority.c - Interpretador de nome de programas.
+	Priority.c - Escalonador com política de Prioridade.
+	entrada.txt - Entrada de programas a serem testados
+	saida.txt - Arquivo gerado quando se executa um dos escalonadores citados acima, com opção de saída do STDOut no arquivo.
+
+
+	== Formato entrada == 
+		
+		ioBound1>7
+		cpuBound1>2
+		cpuBound2>6
+		ioBound2>3
+
+ 	
+	== Compilação == 
+	
+		gcc ioBound1.c -o ioBound1
+		gcc ioBound2.c -o ioBound2
+		gcc cpuBound1.c -o cpuBound1
+		gcc cpuBound2.c -o cpuBound2
+		gcc Priority.c -o Priority
+		gcc InterPriority.c -o InterPriority
+	
+	== Execução ==
+
+		No terminal 1 digite ./Priority para iniciar o escalonador.
+		No terminal 2 digite ./InterPriority para iniciar o interpretador.
+
+	== Saída ==
+		
+		Disponível no arquivo saida.txt
+
+	== Resultados e Comentários ==
+
+		O teste mostra o funcionamento da prioridade. Nesse caso a ordem foi mantida mas o ioBound1 que é o mais lento, tem menor prioridade, com isso esperávamos que o print de saída NÃO misturasse os dois programas de IO, pois o Io2 tem maior prioridade e deve ser executado até o fim antes de passar para o Io1 novamente. O resultado foi obtido.
+
+	
+== Comentarios Finais ==
+
+	- Não conseguimos atender um dos requisitos originais do problema. Escrever o stdout alternadamente no saida.txt. Os resultados vistos atualmente no saída.txt refletem os prints feitos em console. Acreditamos que a escrita intercalada em arquivo não ocorra devido ao gerenciador de arquivos que permite a abstração de edição simultânea com o ioBound 1 e 2, mas na prática só escreve no arquivo quando o programa termina. Sendo assim, a saída não intercala. Mostramos para o professor esse problema no dia 25/Abr e o mesmo falou que não era relevante para a solução nem a nota. (ver diferença de print no console e em arquivo abaixo). Deixamos o código de print em arquivo comentado para avaliação e futuro debug.
+
+	- Interferência Escalanador OS. Por vezes na saída é possível reparar que o ioBound1 que leva 1 segundo para escrever, escreve mais de uma vez por rodada (quantum de 1 segundo). Acreditamos que isso ocorra devido ao intervalo de tempo (variável) para o processo destino receber um sinal. Existe um deltaT entre o envio e o recebimento que não tem com ser compensado.
+	
+	buffer/	atoi - Uma curiosidade interessante foi o que optei por usar um buffer e sscans para ler o interio do arquivo ao invés de atoi. Curiosamente apesar do buffer ser alocado localmente em um loop, o mesmo sempre é alocado na mesma posição de memória. No caso do escalonador de loteria, esse fato introduzia um bug por causa de lixo na memória. Isso foi interessante pois mostrou que sempre há lixo e que há uma gerência do OS na alocação de memória com o intuito de otimiza-la. 
+
+
+** Print FILE **
+
+ioBound2.c started
+ioBound1
+cpuBound1
+cpuBound2
+ioBound2
+ioBound2.c finished
+ioBound1.c started
+IO1 - Working - 1seg
+IO1 - Working - 2seg
+IO1 - Working - 3seg
+IO1 - Working - 4seg
+IO1 - Working - 5seg
+IO1 - Working - 6seg
+IO1 - Working - 7seg
+IO1 - Working - 8seg
+IO1 - Working - 9seg
+IO1 - Working - 10seg
+IO1 - Working - 11seg
+IO1 - Working - 12seg
+IO1 - Working - 13seg
+IO1 - Working - 14seg
+IO1 - Working - 15seg
+IO1 - Working - 16seg
+IO1 - Working - 17seg
+IO1 - Working - 18seg
+IO1 - Working - 19seg
+IO1 - Working - 20seg
+IO1 - Working - 21seg
+IO1 - Working - 22seg
+IO1 - Working - 23seg
+IO1 - Working - 24seg
+IO1 - Working - 25seg
+ioBound1.c finished
+
+
+** PRINT Console **
+
+ESC: Recebido (ioBound1), pid para o novo processo: 2840
+ESC: CONT: (2840)
+ESC: CONT: (2840)
+ESC: Recebido (cpuBound1), pid para o novo processo: 2841
+ESC: Recebido (cpuBound2), pid para o novo processo: 2842
+ESC: STOP: (2840)
+ESC: STOP: (2840)
+ESC: Recebido (ioBound2), pid para o novo processo: 2843
+ESC: CONT: (2841)
+ESC: STOP: (2841)
+ESC: CONT: (2842)
+ESC: STOP: (2842)
+ESC: CONT: (2843)
+ioBound2.c started
+ESC: STOP: (2843)
+ESC: CONT: (2840)
+ioBound1.c started
+IO1 - Working - 1seg
+ESC: STOP: (2840)
+ESC: CONT: (2842)
+ESC: STOP: (2842)
+ESC: CONT: (2843)
+ioBound1
+cpuBound1
+cpuBound2
+ioBound2
+ioBound2.c finished
+ESC: STOP: (2843)
+ESC: CONT: (2840)
+IO1 - Working - 2seg
+IO1 - Working - 3seg
+IO1 - Working - 4seg
+ESC: STOP: (2840)
